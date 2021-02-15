@@ -9,7 +9,7 @@
 Если есть такое решение, подскажите пожалуйста!
 UPDATE. Решение без UNION нашел, оно внизу.
 */
-/* этот запрос вернет только одну запись. В случае, если у нас несколько пользователей имеют о
+/* Запрсо ниже вернет только одну запись. В случае, если у нас несколько пользователей имеют о
 динаковое максимальное количество сообщений,  ответ будет не совсем корректным. 
 */
 SELECT resp_id, Count(*) count_mes FROM 
@@ -18,7 +18,7 @@ SELECT resp_id, Count(*) count_mes FROM
 	SELECT from_users_id as resp_id FROM messages WHERE to_users_id = 84 AND from_users_id IN
 		(
 			SELECT
-				from_users_id
+				IF(from_users_id = 84, to_users_id, from_users_id) as resp_id
 			FROM friend_requests
 			WHERE
 				`status` = 1 AND (from_users_id = 84 OR to_users_id = 84)
@@ -29,7 +29,7 @@ SELECT resp_id, Count(*) count_mes FROM
 	SELECT to_users_id as resp_id FROM messages WHERE from_users_id = 84 AND to_users_id IN
         (
 			SELECT
-				from_users_id
+				IF(from_users_id = 84, to_users_id, from_users_id) as resp_id
 			FROM friend_requests
 			WHERE
 			`status` = 1 AND (from_users_id = 84 OR to_users_id = 84)
@@ -38,7 +38,7 @@ SELECT resp_id, Count(*) count_mes FROM
     GROUP BY t1.resp_id
     ORDER BY COUNT(*) DESC LIMIT 1;
     
-/* этот запрос вернет несколько записе, даже если несколько пользователей имеют одинаковое максимальное 
+/* Запрос ниже вернет несколько записей, даже если несколько пользователей имеют одинаковое максимальное 
 количество сообщений. То есть этот запрос считаю более корректным.
 */
 SELECT resp_id, count_mes 
@@ -51,7 +51,7 @@ FROM (
 			SELECT from_users_id as resp_id FROM messages WHERE to_users_id = 84 AND from_users_id IN
 				(
 					SELECT
-						from_users_id
+						IF(from_users_id = 84, to_users_id, from_users_id) as resp_id
 					FROM friend_requests
 					WHERE
 						`status` = 1 AND (from_users_id = 84 OR to_users_id = 84)
@@ -62,7 +62,7 @@ FROM (
 			SELECT to_users_id as resp_id FROM messages WHERE from_users_id = 84 AND to_users_id IN
 				(
 					SELECT
-						from_users_id
+						IF(from_users_id = 84, to_users_id, from_users_id) as resp_id
 					FROM friend_requests
 					WHERE
 					`status` = 1 AND (from_users_id = 84 OR to_users_id = 84)
@@ -81,7 +81,7 @@ FROM (
 					SELECT from_users_id as resp_id FROM messages WHERE to_users_id = 84 AND from_users_id IN
 						(
 							SELECT
-								from_users_id
+								IF(from_users_id = 84, to_users_id, from_users_id) as resp_id
 							FROM friend_requests
 							WHERE
 								`status` = 1 AND (from_users_id = 84 OR to_users_id = 84)
@@ -92,7 +92,7 @@ FROM (
 					SELECT to_users_id as resp_id FROM messages WHERE from_users_id = 84 AND to_users_id IN
 						(
 							SELECT
-								from_users_id
+								IF(from_users_id = 84, to_users_id, from_users_id) as resp_id
 							FROM friend_requests
 							WHERE
 							`status` = 1 AND (from_users_id = 84 OR to_users_id = 84)
@@ -106,9 +106,10 @@ WHERE t3.count_mes = t4.max_mes;
 
 /*
 понял как решить задачу без UNION!
-Основное решение здесь!
+Основное решение для проверки ниже!
 */
 -- основной запрос. В теории запись может оказаться не одна. То есть какие то друзья нашего пользователя могли отправить и получить одинаковое количество сообщений
+-- которое одновременно является максимумом
 SELECT 'Пользователь(и), кто больше всего общалисьм с нашим пользователей с id = 84' result, resp_id user_id, max_count 
 FROM
 	(
@@ -123,7 +124,7 @@ FROM
 			to_users_id = 84 AND from_users_id IN
 				(
 					SELECT
-						from_users_id
+						IF(from_users_id = 84, to_users_id, from_users_id) as resp_id
 					FROM friend_requests
 					WHERE
 						`status` = 1 AND (from_users_id = 84 OR to_users_id = 84)
@@ -134,7 +135,7 @@ FROM
 			from_users_id = 84 AND to_users_id IN
 				(
 					SELECT
-						from_users_id
+						IF(from_users_id = 84, to_users_id, from_users_id) as resp_id
 					FROM friend_requests
 					WHERE
 						`status` = 1 AND (from_users_id = 84 OR to_users_id = 84)
@@ -158,7 +159,7 @@ FROM
 				to_users_id = 84 AND from_users_id IN
 					(
 						SELECT
-							from_users_id
+							IF(from_users_id = 84, to_users_id, from_users_id) as resp_id
 						FROM friend_requests
 						WHERE
 							`status` = 1 AND (from_users_id = 84 OR to_users_id = 84)
@@ -169,7 +170,7 @@ FROM
 				from_users_id = 84 AND to_users_id IN
 					(
 						SELECT
-							from_users_id
+							IF(from_users_id = 84, to_users_id, from_users_id) as resp_id
 						FROM friend_requests
 						WHERE
 							`status` = 1 AND (from_users_id = 84 OR to_users_id = 84)
